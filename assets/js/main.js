@@ -1,5 +1,5 @@
 var dateAttr = document.getElementById("current-date");
-dateAttr.innerHTML = (new Date()).getFullYear();
+if (dateAttr) dateAttr.innerHTML = (new Date()).getFullYear();
 
 var main = document.getElementById("main-canvas");
 
