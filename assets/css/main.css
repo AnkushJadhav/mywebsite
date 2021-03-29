@@ -84,7 +84,7 @@ a:active {
     padding: 0 !important;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 769px) {
     @keyframes banner-text-shift {
         0% {
             top: 0%;
@@ -193,6 +193,120 @@ a:active {
     .player > iframe {
         padding: 1% 10%;
         height: 100%;
+        width: 100%;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    @keyframes banner-text-shift {
+        0% {
+            top: 0%;
+            left: -100%;
+            font-size: 5em;
+        }
+        50% {
+            top: 0%;
+            left: 10%;
+            font-size: 5em;
+        }
+        100% {
+            top: 100%;
+            left: 35%;
+            font-size: 2em;
+        }
+    }
+    .main-banner-text {
+        position: relative;
+        margin: 0;
+        display: inline-block;
+        color: #66FCF1;
+        padding: 5px;
+        font-style: italic;
+    }
+    .slide-in-left {
+        animation-name: banner-text-shift;
+        animation-duration: 2s;
+        -webkit-animation: banner-text-shift 2.0s forwards;
+        animation: banner-text-shift 2.0s forwards;
+    }
+    @keyframes banner-emoji-shift {
+        0% {
+            right: -100%;
+            font-size: 5em;
+        }
+        50% {
+            right: -10%;
+            font-size: 5em;
+        }
+        100% {
+            right: -35%;
+            font-size: 2em;
+        }
+    }
+    .main-banner-emoji {
+        position: relative;
+        margin: 0;
+        display: inline-block;
+        padding: 5px;
+    
+    }
+    .slide-in-right {
+        animation-name: banner-emoji-shift;
+        animation-duration: 2s;
+        -webkit-animation: banner-emoji-shift 2.0s forwards;
+        animation: banner-emoji-shift 2.0s forwards;
+    }
+    @keyframes secondary-text-visibility {
+        0% {
+            opacity: 0%;
+        }
+        50% {
+            opacity: 0%;
+        }
+        100% {
+            opacity: 100%;
+        }
+    }
+    .secondary-banner-text {
+        color: #C5C6C7;
+        text-align: center;
+        font-size: 100%;
+        padding: 10px;
+    }
+    .profile-img {
+        padding: 10px;
+        margin: 20px;
+        height: 10em;
+        border-radius: 50%;
+        border: 1px solid;
+        border-color: #66FCF1;
+    }
+    .ctr-banner-secondary {
+        top: -10%;
+        position: relative;
+    }
+    .flex-container {
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    .flex-container > div {
+        padding-left: 10px;
+        padding-right: 10px;
+        text-align: center;
+        line-height: 75px;
+        font-size: 20px;
+        flex-wrap: nowrap;
+        width: 100%;
+    }
+    .player {
+        position: relative;
+        display: flex;
+        height: 90vh;
+        justify-content: center;
+    }
+    .player > iframe {
+        padding: 1% 10%;
+        height: 90%;
         width: 100%;
     }
 }
