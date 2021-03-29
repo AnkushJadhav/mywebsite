@@ -1,6 +1,3 @@
-var dateAttr = document.getElementById("current-date");
-if (dateAttr) dateAttr.innerHTML = (new Date()).getFullYear();
-
 var main = document.getElementById("main-canvas");
 
 var w = main.width = window.innerWidth,
