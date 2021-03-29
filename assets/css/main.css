@@ -15,80 +15,7 @@ canvas {
 .font-primary {
     font-family: 'Titillium Web', sans-serif;
 }
-@keyframes banner-text-shift {
-    0% {
-        top: 0%;
-        left: -100%;
-        font-size: 18em;
-    }
-    50% {
-        top: 0%;
-        left: 10%;
-        font-size: 18em;
-    }
-    100% {
-        top: 100%;
-        left: 35%;
-        font-size: 8em;
-    }
-}
-.main-banner-text {
-    position: relative;
-    margin: 0;
-    display: inline-block;
-    color: #66FCF1;
-    padding: 20px;
-    font-style: italic;
-}
-.slide-in-left {
-    animation-name: banner-text-shift;
-    animation-duration: 2s;
-    -webkit-animation: banner-text-shift 2.0s forwards;
-    animation: banner-text-shift 2.0s forwards;
-}
-@keyframes banner-emoji-shift {
-    0% {
-        right: -100%;
-        font-size: 15em;
-    }
-    50% {
-        right: -10%;
-        font-size: 15em;
-    }
-    100% {
-        right: -35%;
-        font-size: 5em;
-    }
-}
-.main-banner-emoji {
-    position: relative;
-    margin: 0;
-    display: inline-block;
-    padding: 20px;
 
-}
-.slide-in-right {
-    animation-name: banner-emoji-shift;
-    animation-duration: 2s;
-    -webkit-animation: banner-emoji-shift 2.0s forwards;
-    animation: banner-emoji-shift 2.0s forwards;
-}
-@keyframes secondary-text-visibility {
-    0% {
-        opacity: 0%;
-    }
-    50% {
-        opacity: 0%;
-    }
-    100% {
-        opacity: 100%;
-    }
-}
-.secondary-banner-text {
-    color: #C5C6C7;
-    text-align: center;
-    font-size: 130%;
-}
 .slow-show-1 {
     animation-name: secondary-text-visibility;
     animation-duration: 1s;
@@ -106,10 +33,6 @@ canvas {
     animation-duration: 4s;
     -webkit-animation: secondary-text-visibility 4.0s forwards;
     animation: secondary-text-visibility 4.0s forwards;
-}
-.ctr-banner-secondary {
-    top: -10%;
-    position: relative;
 }
 
 a {
@@ -136,27 +59,6 @@ a:active {
     width: 100%;
 }
 
-.profile-img {
-    padding: 30px;
-    margin: 20px;
-    height: 10em;
-    border-radius: 50%;
-    border: 1px solid;
-    border-color: #66FCF1;
-}
-.flex-container {
-    display: flex;
-    flex-wrap: nowrap;
-}
-.flex-container > div {
-    padding-left: 50px;
-    padding-right: 50px;
-    text-align: center;
-    line-height: 75px;
-    font-size: 30px;
-    flex-wrap: nowrap;
-    width: 100%;
-}
 .flex-container > div > a:hover {
     color: #66FCF1;
 }
@@ -169,17 +71,6 @@ a:active {
     background: #45A29E;
 }
 
-.player {
-    position: relative;
-    display: flex;
-    height: 80vh;
-    justify-content: center;
-}
-.player > iframe {
-    padding: 1% 10%;
-    height: 100%;
-    width: 100%;
-}
 .full-width {
     width: 100%;
 }
@@ -191,4 +82,117 @@ a:active {
 }
 .p-0 {
     padding: 0 !important;
+}
+
+@media only screen and (min-width: 768px) {
+    @keyframes banner-text-shift {
+        0% {
+            top: 0%;
+            left: -100%;
+            font-size: 18em;
+        }
+        50% {
+            top: 0%;
+            left: 10%;
+            font-size: 18em;
+        }
+        100% {
+            top: 100%;
+            left: 35%;
+            font-size: 8em;
+        }
+    }
+    .main-banner-text {
+        position: relative;
+        margin: 0;
+        display: inline-block;
+        color: #66FCF1;
+        padding: 20px;
+        font-style: italic;
+    }
+    .slide-in-left {
+        animation-name: banner-text-shift;
+        animation-duration: 2s;
+        -webkit-animation: banner-text-shift 2.0s forwards;
+        animation: banner-text-shift 2.0s forwards;
+    }
+    @keyframes banner-emoji-shift {
+        0% {
+            right: -100%;
+            font-size: 15em;
+        }
+        50% {
+            right: -10%;
+            font-size: 15em;
+        }
+        100% {
+            right: -35%;
+            font-size: 5em;
+        }
+    }
+    .main-banner-emoji {
+        position: relative;
+        margin: 0;
+        display: inline-block;
+        padding: 20px;
+    
+    }
+    .slide-in-right {
+        animation-name: banner-emoji-shift;
+        animation-duration: 2s;
+        -webkit-animation: banner-emoji-shift 2.0s forwards;
+        animation: banner-emoji-shift 2.0s forwards;
+    }
+    @keyframes secondary-text-visibility {
+        0% {
+            opacity: 0%;
+        }
+        50% {
+            opacity: 0%;
+        }
+        100% {
+            opacity: 100%;
+        }
+    }
+    .secondary-banner-text {
+        color: #C5C6C7;
+        text-align: center;
+        font-size: 130%;
+    }
+    .profile-img {
+        padding: 30px;
+        margin: 20px;
+        height: 10em;
+        border-radius: 50%;
+        border: 1px solid;
+        border-color: #66FCF1;
+    }
+    .ctr-banner-secondary {
+        top: -10%;
+        position: relative;
+    }
+    .flex-container {
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    .flex-container > div {
+        padding-left: 50px;
+        padding-right: 50px;
+        text-align: center;
+        line-height: 75px;
+        font-size: 30px;
+        flex-wrap: nowrap;
+        width: 100%;
+    }
+    .player {
+        position: relative;
+        display: flex;
+        height: 80vh;
+        justify-content: center;
+    }
+    .player > iframe {
+        padding: 1% 10%;
+        height: 100%;
+        width: 100%;
+    }
 }
