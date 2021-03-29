@@ -4,7 +4,13 @@ html, body {
 }
 .ctr-main {
     background-color: #0B0C10;
-    min-height: 100%
+    min-height: 100%;
+}
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0.08;
 }
 .font-primary {
     font-family: 'Titillium Web', sans-serif;
@@ -33,8 +39,8 @@ html, body {
     color: #66FCF1;
     padding: 20px;
     font-style: italic;
-
-    /* animation properties */
+}
+.slide-in-left {
     animation-name: banner-text-shift;
     animation-duration: 2s;
     -webkit-animation: banner-text-shift 2.0s forwards;
@@ -60,7 +66,8 @@ html, body {
     display: inline-block;
     padding: 20px;
 
-    /* animation properties */
+}
+.slide-in-right {
     animation-name: banner-emoji-shift;
     animation-duration: 2s;
     -webkit-animation: banner-emoji-shift 2.0s forwards;
@@ -81,8 +88,20 @@ html, body {
     color: #C5C6C7;
     text-align: center;
     font-size: 130%;
-
-    /* animation properties */
+}
+.slow-show-1 {
+    animation-name: secondary-text-visibility;
+    animation-duration: 1s;
+    -webkit-animation: secondary-text-visibility 1.0s forwards;
+    animation: secondary-text-visibility 1.0s forwards;
+}
+.slow-show-2 {
+    animation-name: secondary-text-visibility;
+    animation-duration: 2s;
+    -webkit-animation: secondary-text-visibility 2.0s forwards;
+    animation: secondary-text-visibility 2.0s forwards;
+}
+.slow-show-4 {
     animation-name: secondary-text-visibility;
     animation-duration: 4s;
     -webkit-animation: secondary-text-visibility 4.0s forwards;
@@ -130,7 +149,6 @@ a:active {
     flex-wrap: nowrap;
 }
 .flex-container > div {
-    font-family: 'Titillium Web', sans-serif;
     padding-left: 50px;
     padding-right: 50px;
     text-align: center;
@@ -138,12 +156,6 @@ a:active {
     font-size: 30px;
     flex-wrap: nowrap;
     width: 100%;
-
-    /* animation properties */
-    animation-name: secondary-text-visibility;
-    animation-duration: 4s;
-    -webkit-animation: secondary-text-visibility 4.0s forwards;
-    animation: secondary-text-visibility 4.0s forwards;
 }
 .flex-container > div > a:hover {
     color: #66FCF1;
@@ -155,4 +167,28 @@ a:active {
 
 ::selection {
     background: #45A29E;
+}
+
+.player {
+    position: relative;
+    display: flex;
+    height: 80vh;
+    justify-content: center;
+}
+.player > iframe {
+    padding: 1% 10%;
+    height: 100%;
+    width: 100%;
+}
+.full-width {
+    width: 100%;
+}
+.page-banner > h1 {
+    text-align: center;
+}
+.m-0 {
+    margin: 0 !important;
+}
+.p-0 {
+    padding: 0 !important;
 }
