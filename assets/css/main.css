@@ -7,7 +7,7 @@ html, body {
     min-height: 100%;
 }
 canvas {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     opacity: 0.08;
@@ -305,7 +305,7 @@ a:active {
         justify-content: center;
     }
     .player > iframe {
-        padding: 1% 10%;
+        padding: 0% 10%;
         height: 90%;
         width: 100%;
     }
