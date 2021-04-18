@@ -191,7 +191,7 @@ a:active {
         justify-content: center;
     }
     .player > iframe {
-        padding: 1% 10%;
+        padding: 0% 10%;
         height: 100%;
         width: 100%;
     }
