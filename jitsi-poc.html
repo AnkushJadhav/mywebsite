@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Zipteams - reloaded</title>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://devmeet.zipteams.com/libs/lib-jitsi-meet.min.js"></script>
+    <script>
+      const DOMAIN = "devmeet.zipteams.com";
+
+      let conn;
+      let room;
+      let localAVElements = [];
+      let remoteAVElements = [];
+      let userStore = {};
+      let userName = null;
+      let roomName = null;
+      let appInitDone = false;
+
+      function log(...msgs) {
+        console.log(new Date(), '===>', ...msgs);
+      }
+
+      function getId(track) {
+        return track.deviceId || track.stream.id;
+      }
+
+      function isLocalTrack(track) {
+        return room.getLocalTracks().find(t => t.getId() === track.getId());
+      }
+
+      function handleRemoteAudioStreamAdded(track) {
+        let audioElement = document.createElement("audio");
+        audioElement.setAttribute("id", "audio-stream-track_"+getId(track));
+        audioElement.setAttribute("autoplay", true);
+        let remoteAudioStreamsWrapper = document.getElementById("remote-audio-streams");
+        remoteAudioStreamsWrapper.appendChild(audioElement);
+        track.attach(audioElement);
+        remoteAVElements.push(audioElement);
+      }
+
+      function handleRemoteVideoStreamAdded(track, name) {
+        let nameElement = document.createElement("h4");
+        nameElement.style.margin = '0';
+        nameElement.style.textAlign = 'center';
+        nameElement.innerHTML = name;
+        nameElement.style.zIndex = 5;
+        nameElement.style.backgroundColor = 'white';
+        let videoElement = document.createElement("video");
+        videoElement.setAttribute("autoplay", true);
+        videoElement.style.width = '100%';
+        videoElement.style.maxHeight = '100%';
+
+        let wrapper = document.createElement("div");
+        wrapper.setAttribute("id", "video-stream-track_"+getId(track));
+        wrapper.style.maxHeight = '100%';
+        wrapper.style.flexGrow = '1';
+        wrapper.appendChild(nameElement);
+        wrapper.appendChild(videoElement);
+        
+        let remoteVideoStreamsWrapper = document.getElementById("remote-video-streams");
+        remoteVideoStreamsWrapper.appendChild(wrapper);
+        track.attach(videoElement);
+        remoteAVElements.push(remoteVideoStreamsWrapper);
+      }
+
+      function onTrackAdded(track) {
+        log('TRACK_ADDED', track);
+        if (isLocalTrack(track)) return;
+
+        switch(track.getType()) {
+          case "audio":
+            handleRemoteAudioStreamAdded(track);
+            break;
+          case "video":
+            handleRemoteVideoStreamAdded(track, userStore[track.getParticipantId()]);
+            break;
+        }
+      }
+
+      function handleRemoteAudioStreamRemoved(track) {
+        if (isLocalTrack(track)) return;
+        let element = document.getElementById("audio-stream-track_"+getId(track));
+        if (element) element.remove();
+      }
+      
+      function handleRemoteVideoStreamRemoved(track) {
+        if (isLocalTrack(track)) return;
+        let element = document.getElementById("video-stream-track_"+getId(track));
+        if (element) element.remove();
+      }
+
+      function onTrackRemoved(track) {
+        log('TRACK_REMOVED', track);
+        if (isLocalTrack(track)) return;
+
+        switch(track.getType()) {
+          case "audio":
+            handleRemoteAudioStreamRemoved(track);
+            break;
+          case "video":
+            handleRemoteVideoStreamRemoved(track);
+            break;
+        }
+      }
+
+      function onConferenceJoined() {
+        log('CONFERENCE_JOINED');
+      }
+
+      function onUserJoined(id, user) {
+        log('USER_JOINED', id, user);
+
+        userStore[id] = user.getDisplayName()
+      }
+
+      function onTrackMuteChanged(track) {
+        log('TRACK_MUTE_CHANGED', track);
+
+        if (!track.isMuted()) {
+          let localVideoElement = document.getElementById("video-stream-track_"+getId(track));
+          if (localVideoElement) {
+            localVideoElement.srcObject = track.stream;
+            localVideoElement.play();
+          }
+        }
+      }
+
+      function getConferenceRoom(conn, name) {
+        const options = {};
+        return conn.initJitsiConference(name, options);
+      }
+
+      async function leaveConference() {
+        for (let track of room.getLocalTracks()) {
+          await track.dispose();
+        }
+        for (let localAVElement of localAVElements) {
+          localAVElement.remove();
+        }
+        for (let remoteAVElement of remoteAVElements) {
+          remoteAVElement.remove();
+        }
+        await room.leave()
+          
+        location.reload();
+      }
+
+      function onConnectionEstablished() {
+        log('CONNECTION_ESTABLISHED');
+
+        startRoom(conn);
+      }
+
+      function onMessageReceived(id, text, ts) {
+        log('MSG', id, text, ts);
+
+        let chatArea = document.getElementById('chat-area');
+        let msgElement = document.createElement("span");
+        msgElement.innerHTML = '['+userStore[id]+'] '+text;
+        chatArea.appendChild(msgElement);
+        chatArea.scrollTop = chatArea.scrollHeight;
+      }
+
+      function startRoom(conn) {
+        room = getConferenceRoom(conn, roomName);
+        room.setDisplayName(userName);
+        userStore[room.myUserId()] = userName;
+        room.on(JitsiMeetJS.events.conference.TRACK_ADDED, onTrackAdded);
+        room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, onTrackRemoved);
+        room.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, onConferenceJoined);
+        room.on(JitsiMeetJS.events.conference.USER_JOINED, onUserJoined);
+        room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, onTrackMuteChanged);
+        room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, onMessageReceived);
+
+        createUserTracks(room, ["video", "audio"]);
+        room.join(null);
+      }
+
+      function onConnectionFailed() {
+        log('CONNECTION_FAILED');
+      }
+
+      function onConnectionDisconnected() {
+        log('CONNECTION_DISCONNECTED');
+      }
+
+      function getConnection() {
+        const options = {
+          serviceUrl: 'wss://'+DOMAIN+'/xmpp-websocket?room='+encodeURI(roomName.toLowerCase()),
+          websocketKeepAliveUrl: 'https://'+DOMAIN+'/xmpp-websocket?room='+encodeURI(roomName.toLowerCase()),
+          hosts: {
+            domain: DOMAIN,
+            muc: 'muc.'+DOMAIN
+          }
+        };
+        return new JitsiMeetJS.JitsiConnection(null, null, options);
+      }
+
+      function shareScreen() {
+        createUserTracks(room, ["desktop"]);
+      }
+
+      function stopShareScreen() {
+        createUserTracks(room, ["video"]);
+      }
+
+      function createUserTracks(room, devices) {
+        let options = {
+          devices
+        };
+        JitsiMeetJS.createLocalTracks(options)
+          .then(function(tracks) {
+            for (let track of tracks) {
+              log('adding track to room : '+track.type);
+
+              if (track.getType() === "video") {
+                let videoElement = document.createElement("video");
+                videoElement.setAttribute("id", "video-stream-track_"+getId(track));
+                videoElement.srcObject = track.stream;
+                videoElement.setAttribute("autoplay", true);
+                videoElement.style.width = '100%';
+                videoElement.style.height = '100%';
+                let localVideoStreamsWrapper = document.getElementById("local-video-streams");
+                localVideoStreamsWrapper.appendChild(videoElement);
+                localAVElements.push(videoElement);
+              }
+
+              let existingVideoStream = room.getLocalTracks().find(t => t.getType() === "video");
+              if (existingVideoStream && track.getType() === "video") room.replaceTrack(existingVideoStream, track);
+              else room.addTrack(track);
+            }
+          })
+          .catch(function(err) {
+            log('error while creating tracks');
+            log(err);
+          });
+      }
+
+      function resumeLocalVideo() {
+        let track = room.getLocalTracks().find(t => t.getType() === "video");
+        track.unmute();
+      }
+
+      function pauseLocalVideo() {
+        let track = room.getLocalTracks().find(t => t.getType() === "video");
+        track.mute();
+      }
+
+      function resumeLocalAudio() {
+        let track = room.getLocalTracks().find(t => t.getType() === "audio");
+        track.unmute();
+      }
+
+      function pauseLocalAudio() {
+        let track = room.getLocalTracks().find(t => t.getType() === "audio");
+        track.mute();
+      }
+
+      function sendChat(e) {
+        e.preventDefault();
+
+        let chatInput = document.getElementById("chat-input");
+        let text = chatInput.value;
+
+        room.sendTextMessage(text);
+        chatInput.value = '';
+      }
+
+      function init(e) {
+        e.preventDefault();
+
+        let nameInput = document.getElementById("name-input");
+        let name = nameInput.value;
+
+        let roomInput = document.getElementById("room-input");
+        let room = roomInput.value;
+
+        if (name && name.trim() !== '' && room && room.trim() !== '') {
+          userName = name.trim();
+          roomName = room.trim();
+          nameInput.setAttribute("disabled", true);
+          roomInput.setAttribute("disabled", true);
+
+          let roomUrlElement = document.getElementById("room-url");
+          roomUrlElement.innerHTML = "https://"+DOMAIN+"/"+roomName;
+
+          if (!appInitDone) {
+            appInitDone = true;
+            confInit();
+          }
+        }
+      }
+
+      function confInit() {
+        JitsiMeetJS.init();
+        JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.INFO);
+
+        conn = getConnection();
+
+        conn.addEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, onConnectionEstablished);
+        conn.addEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, onConnectionFailed);
+        conn.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, onConnectionDisconnected);
+        conn.connect();
+      }
+
+      function bootstrap() {
+        
+        let chatForm = document.getElementById("chat-form");
+        chatForm.addEventListener('submit', sendChat);
+
+        let nameForm = document.getElementById("form-display-name");
+        nameForm.addEventListener('submit', init);
+      }
+
+      $(document).ready(bootstrap);
+    </script>
+
+  </head>
+  <body style="margin: 0;">
+    <div id="root" style="height: 100vh; width: 100vw;">
+      <div id="header" style="width: 100%; height: 5%; background-color: aqua; display: flex; flex-wrap: wrap; align-items: stretch; align-content: stretch; gap: 10px; justify-content: space-between;">
+        <h1 style="margin: 0;">ZIPTEAMS</h5>
+          <form id="form-display-name" style="display: flex;">
+            <input id="name-input" type="text" placeholder="ENTER YOUR DISPLAY NAME" style="width: 300px;">
+            <input id="room-input" type="text" placeholder="ENTER YOUR ROOM NAME" style="width: 300px;">
+            <input id="btn-name-set" type="submit" value="Submit">
+          </form>
+        <h5 style="margin: 0;">Jitsi Host Room = <span id="room-url"></span></h5>
+      </div>
+      <div id="remote-video-streams" style="width: 100%; height: 50%; display: flex; flex-wrap: wrap; align-items: stretch; align-content: stretch; gap: 10px; border: solid 1px; overflow: scroll;"></div>
+      <div id="local-video-streams" style="background: yellow; width: 100%; height: 35%; display: flex; justify-content: space-evenly; align-items: stretch; align-content: stretch; gap: 10px; border: solid 1px;">
+        <div id="chat-box" style="align-self: flex-end; height: 100%; width: 100%; border-right: solid green; display: flex; flex-direction: column;">
+          <div style="border-bottom: solid; margin-bottom: 2px; background-color: aqua;">Chat Box</div>
+          <div id="chat-area" style="background: white; overflow: scroll; display: flex; flex-direction: column; align-content: flex-end; height: 100%;"></div>
+          <form id="chat-form" style="display: flex;">
+            <input id="chat-input" type="text" placeholder="message..." style="width: 100%;">
+            <input id="btn-chat-send" type="submit" value="Send">
+          </form>
+        </div>
+      </div>
+      <div id="control-bar" style="width: 100%; height: 10%; border: solid 1px; display: flex; justify-content: space-evenly; align-items: stretch; align-content: stretch; gap: 10px;">
+        <button id="btn-resume-video" onclick="resumeLocalVideo()">Resume Video</button>
+        <button id="btn-pause-video" onclick="pauseLocalVideo()">Pause Video</button>
+        <button id="btn-resume-audio" onclick="resumeLocalAudio()">Resume Audio</button>
+        <button id="btn-pause-audio" onclick="pauseLocalAudio()">Pause Audio</button>
+        <button id="btn-share-screen" onclick="shareScreen()">Share Screen</button>
+        <button id="btn-stop-share-screen" onclick="stopShareScreen()">Stop Share Screen</button>
+        <button id="btn-leave-conf" onclick="leaveConference()" style="background-color: red; color: white; font-weight: bolder;">LEAVE CONFERENCE!</button>
+      </div>
+      <div id="remote-audio-streams" hidden></div>
+    </div>
+  </body>
+</html>
